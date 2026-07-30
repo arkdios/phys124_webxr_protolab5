@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHYS 124 Virtual Lab: Vector Addition of Forces</title>
+  <meta name="description" content="WebXR spike: force-table experiment (PHYS 124, Experiment 5), desktop mouse mode, hybrid WebSocket+REST backend hook." />
+
+  <!-- Editorial serif for headings + monospace for data readouts (minimalist-ui skill).
+       Falls back cleanly to system fonts if this can't load (e.g. offline dev). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- A-Frame core. No aframe-physics-system this time: this experiment
+       is pure vector math (no falling masses), so the physics engine
+       would be dead weight. -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Lab console -->
+  <aside id="lab-console">
+    <header class="panel-header">
+      <h1>Vector Addition of Forces</h1>
+      <div class="tag-row">
+        <span class="tag tag--blue">PHYS 124 · Exp. 5</span>
+        <span class="tag" id="hud-connection-value" data-status="offline">Offline</span>
+      </div>
+    </header>
+
+    <section class="panel-section">
+      <h2>Instructions</h2>
+      <p>
+        Two known weights pull the ring off-centre. Drag the spring scale
+        around the platform until the ring returns to the centre. That
+        balancing force is what you'd record as <strong>F ± δF</strong> for
+        Case A in your data table.
+      </p>
+    </section>
+
+    <section class="panel-section readings">
+      <h2>Live Reading</h2>
+      <div class="reading-row">
+        <span>Step</span>
+        <span id="hud-step-value" class="mono">idle</span>
+      </div>
+      <div class="reading-row">
+        <span>Force</span>
+        <span id="hud-force-value" class="mono">0 N</span>
+      </div>
+      <div class="reading-row">
+        <span>Angle</span>
+        <span id="hud-angle-value" class="mono">0°</span>
+      </div>
+    </section>
+  </aside>
+
+  <a-scene cursor="rayOrigin: mouse"
+           raycaster="objects: .interactive">
+
+    <a-assets></a-assets>
+
+    <!-- Desktop camera rig: mouse look + WASD, stand-in for headset pose -->
+    <a-entity id="rig"
+      camera
+      position="0 1.6 0"
+      look-controls
+      wasd-controls="enabled: true">
+    </a-entity>
+
+    <a-entity light="type: ambient; intensity: 0.7"></a-entity>
+    <a-entity light="type: directional; intensity: 0.6" position="1 2 1"></a-entity>
+
+    <!-- The force platform: modelled as a wall-mounted disk facing the
+         student (rather than the real apparatus's horizontal tabletop)
+         so a single camera-facing drag plane (grabbable.js) can double
+         as the platform's own 2D surface. See BUILD-LOG.md. -->
+    <a-entity id="force-platform" position="0 1.6 -1">
+      <a-circle radius="0.35" color="#3b3a36" segments="64"></a-circle>
+
+      <!-- 0° reference line, purely a visual anchor -->
+      <a-box width="0.35" height="0.004" depth="0.002"
+             color="#787774" position="0.175 0 0.002"></a-box>
+
+      <!-- Pulley 1: Case A, 200g @ 30° (manual Table 5.1) -->
+      <a-cylinder radius="0.02" height="0.03" color="#111111"
+                  rotation="90 0 0" position="0.303 0.175 0.02"></a-cylinder>
+      <a-text value="Case A: 200g @ 30 deg" align="center" color="#F7F6F3"
+              width="1" position="0.303 0.24 0.03"></a-text>
+
+      <!-- Pulley 2: Case A, 200g @ 120° (manual Table 5.1) -->
+      <a-cylinder radius="0.02" height="0.03" color="#111111"
+                  rotation="90 0 0" position="-0.175 0.303 0.02"></a-cylinder>
+      <a-text value="Case A: 200g @ 120 deg" align="center" color="#F7F6F3"
+              width="1" position="-0.175 0.37 0.03"></a-text>
+
+      <!-- The ring: force-ring.js drives its position every frame -->
+      <a-torus id="ring" radius="0.03" radius-tubular="0.006"
+               color="#9F2F2D" position="0 0 0.03" force-ring></a-torus>
+
+      <!-- The spring scale: the student's tool. class="interactive" is
+           required for the scene raycaster to hit it in mouse mode. -->
+      <a-box id="spring-scale"
+             class="interactive"
+             width="0.06" height="0.02" depth="0.02"
+             color="#1F6C9F"
+             position="-0.1 -0.12 0.05"
+             grabbable
+             spring-scale="platformSelector: #force-platform">
+      </a-box>
+      <a-text value="spring scale" align="center" color="#2F3437"
+              width="0.8" position="-0.1 -0.17 0.05"></a-text>
+    </a-entity>
+
+  </a-scene>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

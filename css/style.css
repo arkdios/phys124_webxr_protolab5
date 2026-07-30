@@ -1,0 +1,129 @@
+ :root {
+    /* Warm monochrome palette */
+    --color-bg: #fbfbfa;
+    --color-surface: #ffffff;
+    --color-border: #eaeaea;
+    --color-text: #2f3437;
+    --color-text-muted: #787774;
+  
+    /* Muted pastel accents (tags only — colour is a scarce resource) */
+    --pastel-blue-bg: #e1f3fe;
+    --pastel-blue-text: #1f6c9f;
+    --pastel-green-bg: #edf3ec;
+    --pastel-green-text: #346538;
+    --pastel-red-bg: #fdebec;
+    --pastel-red-text: #9f2f2d;
+  
+    /* Typography */
+    --font-serif: "Newsreader", "Playfair Display", Georgia, serif;
+    --font-sans: "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+  }
+  
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    font-family: var(--font-sans);
+    color: var(--color-text);
+  }
+  
+  /* Lab console panel */
+  
+  #lab-console {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    width: 280px;
+    max-width: calc(100vw - 32px);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* ultra-diffuse, low opacity */
+  }
+  
+  .panel-header h1 {
+    margin: 0 0 10px;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 19px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+  
+  .tag-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--pastel-blue-bg);
+    color: var(--pastel-blue-text);
+  }
+  
+  .tag--blue {
+    background: var(--pastel-blue-bg);
+    color: var(--pastel-blue-text);
+  }
+  
+  /* Connection status tag swaps colour by data-status */
+  .tag[data-status="offline"] {
+    background: var(--pastel-red-bg);
+    color: var(--pastel-red-text);
+  }
+  
+  .tag[data-status="online"] {
+    background: var(--pastel-green-bg);
+    color: var(--pastel-green-text);
+  }
+  
+  .panel-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+  }
+  
+  .panel-section h2 {
+    margin: 0 0 8px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+  }
+  
+  .panel-section p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--color-text);
+  }
+  
+  .reading-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    font-size: 13px;
+  }
+  
+  .reading-row span:first-child {
+    color: var(--color-text-muted);
+  }
+  
+  .mono {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-text);
+  }
