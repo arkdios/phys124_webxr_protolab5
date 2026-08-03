@@ -1,19 +1,15 @@
-// js/main.js
-//
-// Entry point. Importing the component files registers them with AFRAME
-// as a side effect (AFRAME.registerComponent runs at module load time).
-// Then this wires LabState + the live reading events to the on-screen
-// panel, and kicks off the hybrid backend connection.
-
 import "./components/grabbable.js";
 import "./components/spring-scale.js";
 import "./components/force-ring.js";
+import "./components/string-line.js";
 import { LabState } from "./lab-state.js";
 import { init as initBackend, onConnectionChange } from "./network/hybrid-client.js";
+import { initSceneHud } from "./ui/scene-hud.js";
 
-// No live backend yet. This lag short-circuits every network call
-// in rest-client.js and socket-client.js so the console stays clean.
-// Flip to false once there's a real backend to test against.
+// No live backend yet (open item #4 is now resolved as hybrid WebSocket
+// + REST. This flag short-circuits every network call in rest-client.js and
+// socket-client.js so the console stays clean. Flip to false once there's a
+// real backend to test against.
 window.__LAB_BACKEND_DISABLED__ = true;
 
 const panel = {
@@ -23,9 +19,19 @@ const panel = {
     connection: document.querySelector("#hud-connection-value"),
 };
 
+const sceneHud = initSceneHud();
+
+// Merged local copy of the same two data sources the flat panel reads
+// (LabState's step, and spring-scale.js's reading-update event), so the
+// diegetic panel's single multi-line text block can show all three
+// values together no matter which one just changed.
+const sceneReadout = { step: "idle", forceN: 0, angleDeg: 0 };
+
 // Discrete state (idle / balance-attempt / balanced); see lab-state.js
 LabState.subscribe((state) => {
     panel.step.textContent = state.step;
+    sceneReadout.step = state.step;
+    sceneHud.setReadout(sceneReadout);
 });
 
 // Continuous reading (force/angle while dragging).
@@ -36,11 +42,15 @@ LabState.subscribe((state) => {
 document.querySelector("a-scene").addEventListener("reading-update", (evt) => {
     panel.force.textContent = `${evt.detail.forceN} N`;
     panel.angle.textContent = `${evt.detail.angleDeg}°`;
+    sceneReadout.forceN = evt.detail.forceN;
+    sceneReadout.angleDeg = evt.detail.angleDeg;
+    sceneHud.setReadout(sceneReadout);
 });
 
 onConnectionChange((connected) => {
     panel.connection.textContent = connected ? "Connected" : "Offline";
     panel.connection.dataset.status = connected ? "online" : "offline";
+    sceneHud.setConnection(connected);
 });
 
 initBackend({ course: "PHYS 124", experiment: "vector-addition-of-forces" });

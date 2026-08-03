@@ -1,118 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PHYS 124 Virtual Lab: Vector Addition of Forces</title>
-  <meta name="description" content="WebXR spike: force-table experiment (PHYS 124, Experiment 5), desktop mouse mode, hybrid WebSocket+REST backend hook." />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PHYS 124 Virtual Lab: Vector Addition of Forces</title>
+    <meta name="description" content="WebXR spike: force-table experiment (PHYS 124, Experiment 5), desktop mouse mode, real gravity/friction physics on every object." />
 
-  <!-- Editorial serif for headings + monospace for data readouts (minimalist-ui skill).
-       Falls back cleanly to system fonts if this can't load (e.g. offline dev). -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 
-  <!-- A-Frame core. No aframe-physics-system this time: this experiment
-       is pure vector math (no falling masses), so the physics engine
-       would be dead weight. -->
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <!-- A-Frame core + physics -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.2.2/dist/aframe-physics-system.min.js"></script>
 
-  <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-  <!-- Lab console -->
-  <aside id="lab-console">
-    <header class="panel-header">
-      <h1>Vector Addition of Forces</h1>
-      <div class="tag-row">
-        <span class="tag tag--blue">PHYS 124 · Exp. 5</span>
-        <span class="tag" id="hud-connection-value" data-status="offline">Offline</span>
-      </div>
-    </header>
+    <aside id="lab-console">
+        <header class="panel-header">
+            <h1>Vector Addition of Forces</h1>
+            <div class="tag-row">
+                <span class="tag tag--blue">PHYS 124 · Exp. 5</span>
+                <span class="tag" id="hud-connection-value" data-status="offline">Offline</span>
+            </div>
+        </header>
 
-    <section class="panel-section">
-      <h2>Instructions</h2>
-      <p>
-        Two known weights pull the ring off-centre. Drag the spring scale
-        around the platform until the ring returns to the centre. That
-        balancing force is what you'd record as <strong>F ± δF</strong> for
-        Case A in your data table.
-      </p>
-    </section>
+        <section class="panel-section">
+            <h2>What to do</h2>
+            <ol class="steps">
+                <li>Two known weights (200 g each) pull the ring off centre.</li>
+                <li>Pick up the spring scale and drag it around the table.</li>
+                <li>Find the spot where the ring returns to centre.</li>
+                <li>Record the Force and Angle below as your Case A result.</li>
+            </ol>
+            <p class="hint">Everything on the table (pulleys, masses, the scale) can be picked up and moved: gravity and friction hold each one wherever you set it down.</p>
+        </section>
 
-    <section class="panel-section readings">
-      <h2>Live Reading</h2>
-      <div class="reading-row">
-        <span>Step</span>
-        <span id="hud-step-value" class="mono">idle</span>
-      </div>
-      <div class="reading-row">
-        <span>Force</span>
-        <span id="hud-force-value" class="mono">0 N</span>
-      </div>
-      <div class="reading-row">
-        <span>Angle</span>
-        <span id="hud-angle-value" class="mono">0°</span>
-      </div>
-    </section>
-  </aside>
+        <section class="panel-section readings">
+            <h2>Live Reading</h2>
+            <div class="reading-row">
+                <span>Step</span>
+                <span id="hud-step-value" class="mono">idle</span>
+            </div>
+            <div class="reading-row">
+                <span>Force</span>
+                <span id="hud-force-value" class="mono">0 N</span>
+            </div>
+            <div class="reading-row">
+                <span>Angle</span>
+                <span id="hud-angle-value" class="mono">0°</span>
+            </div>
+        </section>
+    </aside>
 
-  <a-scene cursor="rayOrigin: mouse"
+  <!-- Gravity  -->
+  <a-scene physics="gravity: -9.8; debug: false"
+           cursor="rayOrigin: mouse"
            raycaster="objects: .interactive">
 
-    <a-assets></a-assets>
+    <a-assets>
+        <img id="platform-texture" src="assets/textures/force-table.png" crossorigin="anonymous">
+    </a-assets>
 
-    <!-- Desktop camera rig: mouse look + WASD, stand-in for headset pose -->
+    <!-- Camera stands at a lab bench, looking down at the table. -->
     <a-entity id="rig"
-      camera
-      position="0 1.6 0"
-      look-controls
-      wasd-controls="enabled: true">
+              camera
+              position="0 1.6 0.4"
+              rotation="-35 0 0"
+              look-controls
+              wasd-controls="enabled: true">
     </a-entity>
 
     <a-entity light="type: ambient; intensity: 0.7"></a-entity>
     <a-entity light="type: directional; intensity: 0.6" position="1 2 1"></a-entity>
 
-    <!-- The force platform: modelled as a wall-mounted disk facing the
-         student (rather than the real apparatus's horizontal tabletop)
-         so a single camera-facing drag plane (grabbable.js) can double
-         as the platform's own 2D surface. See BUILD-LOG.md. -->
-    <a-entity id="force-platform" position="0 1.6 -1">
-      <a-circle radius="0.35" color="#3b3a36" segments="64"></a-circle>
+    <!-- The table surface. A short cylinder rather than a flat circle so
+         it has real volume for static-body to collide against (a
+         zero-thickness shape is a degenerate collider). Lives directly
+         at scene root, not nested under anything: aframe-physics-system
+         has a documented history of mispositioning bodies nested under
+         a transformed parent (n5ro/aframe-physics-system issues #18,
+         #158), and everything on this table now needs a working body,
+         so nothing physics-relevant is nested in this build any more.
+         See BUILD-LOG.md decision log. -->
+    <a-cylinder id="force-platform" radius="0.35" height="0.02"
+                position="0 0.9 -0.6"
+                material="src: #platform-texture"
+                static-body="shape: cylinder; cylinderAxis: y; friction: 0.6">
+    </a-cylinder>
 
-      <!-- 0° reference line, purely a visual anchor -->
-      <a-box width="0.35" height="0.004" depth="0.002"
-             color="#787774" position="0.175 0 0.002"></a-box>
+    <!-- Central post: purely decorative, no body, no interaction. -->
+    <a-cylinder radius="0.012" height="0.03" color="#2a2a2a"
+                position="0 0.925 -0.6">
+    </a-cylinder>
 
-      <!-- Pulley 1: Case A, 200g @ 30° (manual Table 5.1) -->
-      <a-cylinder radius="0.02" height="0.03" color="#111111"
-                  rotation="90 0 0" position="0.303 0.175 0.02"></a-cylinder>
-      <a-text value="Case A: 200g @ 30 deg" align="center" color="#F7F6F3"
-              width="1" position="0.303 0.24 0.03"></a-text>
-
-      <!-- Pulley 2: Case A, 200g @ 120° (manual Table 5.1) -->
-      <a-cylinder radius="0.02" height="0.03" color="#111111"
-                  rotation="90 0 0" position="-0.175 0.303 0.02"></a-cylinder>
-      <a-text value="Case A: 200g @ 120 deg" align="center" color="#F7F6F3"
-              width="1" position="-0.175 0.37 0.03"></a-text>
-
-      <!-- The ring: force-ring.js drives its position every frame -->
-      <a-torus id="ring" radius="0.03" radius-tubular="0.006"
-               color="#9F2F2D" position="0 0 0.03" force-ring></a-torus>
-
-      <!-- The spring scale: the student's tool. class="interactive" is
-           required for the scene raycaster to hit it in mouse mode. -->
-      <a-box id="spring-scale"
-             class="interactive"
-             width="0.06" height="0.02" depth="0.02"
-             color="#1F6C9F"
-             position="-0.1 -0.12 0.05"
-             grabbable
-             spring-scale="platformSelector: #force-platform">
-      </a-box>
-      <a-text value="spring scale" align="center" color="#2F3437"
-              width="0.8" position="-0.1 -0.17 0.05"></a-text>
+    <!-- Invisible anchor the ring's spring pulls toward, at the ring's
+         expected resting height on the table surface. -->
+    <a-entity id="platform-anchor"
+              position="0 0.94 -0.6"
+              geometry="primitive: sphere; radius: 0.01"
+              material="opacity: 0"
+              static-body="shape: sphere; sphereRadius: 0.01">
     </a-entity>
+
+    <!-- The ring: genuinely physics-driven. dynamic-body gives it real
+         mass and lets gravity/friction/collision settle it onto the
+         table; the spring component supplies the centre-seeking pull
+         (standing in for taut strings only being able to pull, not
+         push); force-ring.js applies the known tensions + live scale
+         force each tick, in the table's horizontal plane (world X/Z). -->
+    <a-torus id="ring" radius="0.03" radius-tubular="0.006"
+             color="#C4C3BE" position="0 0.94 -0.6"
+             dynamic-body="shape: sphere; sphereRadius: 0.03; mass: 0.01; friction: 0.1; linearDamping: 0.5"
+             spring="target: #platform-anchor; stiffness: 40; damping: 1.2"
+             force-ring>
+    </a-torus>
+
+    <!-- Pulley 1: Case A, 200g @ 30 deg (manual Table 5.1). Grabbable
+         and physics-affected like everything else on the table now;
+         the tension the ring feels still comes from the fixed Case A
+         data (js/data/experiment-cases.js), not from wherever this prop
+         currently sits, to keep the core exercise's answer well-defined.
+         See BUILD-LOG.md decision log. -->
+    <a-cylinder id="pulley-1" class="interactive" radius="0.022" height="0.012"
+                color="#1a1a1a" position="0.2425 0.93 -0.74"
+                dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5"
+                grabbable>
+    </a-cylinder>
+    <a-text value="200 g @ 30 deg" align="center" color="#2F3437" width="0.9"
+            position="0.2425 0.95 -0.74" look-at="#rig"></a-text>
+
+    <!-- Pulley 2: Case A, 200g @ 120 deg -->
+    <a-cylinder id="pulley-2" class="interactive" radius="0.022" height="0.012"
+                color="#1a1a1a" position="-0.14 0.93 -0.8425"
+                dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5"
+                grabbable>
+    </a-cylinder>
+    <a-text value="200 g @ 120 deg" align="center" color="#2F3437" width="0.9"
+            position="-0.14 0.95 -0.8425" look-at="#rig"></a-text>
+
+    <!-- Hanging-mass props: real 200g dynamic-body weights the student
+         can pick up and inspect, sitting near their pulley. -->
+    <a-cylinder id="mass-1" class="interactive" radius="0.022" height="0.03"
+                color="#8f8e89" position="0.2771 0.925 -0.76"
+                dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6"
+                grabbable>
+    </a-cylinder>
+    <a-cylinder id="mass-2" class="interactive" radius="0.022" height="0.03"
+                color="#8f8e89" position="-0.16 0.925 -0.8771"
+                dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6"
+                grabbable>
+    </a-cylinder>
+
+    <!-- The spring scale -->
+    <a-box id="spring-scale" class="interactive"
+           width="0.09" height="0.024" depth="0.016" color="#E5E4DF"
+           position="-0.141 0.922 -0.549"
+           dynamic-body="shape: box; mass: 0.05; friction: 0.4"
+           grabbable
+           spring-scale="platformSelector: #force-platform">
+    </a-box>
+    <a-text value="spring scale" align="center" color="#2F3437" width="0.8"
+            position="-0.141 0.94 -0.549" look-at="#rig"></a-text>
+
+    <!-- Strings  -->
+    <a-entity string-line="from: #ring; to: #pulley-1"></a-entity>
+    <a-entity string-line="from: #ring; to: #pulley-2"></a-entity>
+    <a-entity string-line="from: #ring; to: #spring-scale"></a-entity>
+
+    <!-- In-world console -->
+    <a-plane width="0.54" height="0.7" color="#EAEAEA"
+             position="-0.55 1.32 -0.902" rotation="0 15 0"></a-plane>
+    <a-plane width="0.5" height="0.66" color="#FFFFFF"
+             position="-0.55 1.32 -0.9" rotation="0 15 0"></a-plane>
+
+    <a-text value="PHYS 124: Vector Addition of Forces" align="center"
+            color="#2F3437" width="0.46" wrap-count="26"
+            position="-0.55 1.58 -0.899" rotation="0 15 0"></a-text>
+
+    <a-text id="hud3d-connection" value="Status: Offline" align="center"
+            color="#9F2F2D" width="0.4" wrap-count="30"
+            position="-0.55 1.53 -0.899" rotation="0 15 0"></a-text>
+
+    <a-text value="What to do:
+1. Two 200g masses pull the ring off centre.
+2. Pick up the spring scale.
+3. Drag it until the ring re-centres.
+4. Record the Force + Angle below."
+            align="left" color="#2F3437" width="0.42" wrap-count="28"
+            line-height="42"
+            position="-0.75 1.46 -0.899" rotation="0 15 0"></a-text>
+
+    <a-text id="hud3d-readout" value="Step: idle
+Force: 0 N
+Angle: 0 deg"
+            align="left" color="#2F3437" width="0.42" wrap-count="28"
+            line-height="46" font="monoid"
+            position="-0.75 1.12 -0.899" rotation="0 15 0"></a-text>
 
   </a-scene>
 
