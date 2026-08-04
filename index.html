@@ -14,193 +14,233 @@
     <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.2.2/dist/aframe-physics-system.min.js"></script>
 
     <link rel="stylesheet" href="css/style.css" />
-</head>
-<body>
+    </head>
+    <body>
 
     <aside id="lab-console">
         <header class="panel-header">
-            <h1>Vector Addition of Forces</h1>
-            <div class="tag-row">
-                <span class="tag tag--blue">PHYS 124 · Exp. 5</span>
-                <span class="tag" id="hud-connection-value" data-status="offline">Offline</span>
-            </div>
+        <h1>Vector Addition of Forces</h1>
+        <div class="tag-row">
+            <span class="tag tag--blue">PHYS 124 · Exp. 5</span>
+            <span class="tag" id="hud-connection-value" data-status="offline">Offline</span>
+        </div>
         </header>
 
         <section class="panel-section">
-            <h2>What to do</h2>
-            <ol class="steps">
-                <li>Two known weights (200 g each) pull the ring off centre.</li>
-                <li>Pick up the spring scale and drag it around the table.</li>
-                <li>Find the spot where the ring returns to centre.</li>
-                <li>Record the Force and Angle below as your Case A result.</li>
-            </ol>
-            <p class="hint">Everything on the table (pulleys, masses, the scale) can be picked up and moved: gravity and friction hold each one wherever you set it down.</p>
+        <h2>What to do</h2>
+        <ol class="steps">
+            <li>Two known weights (200 g each) pull the ring off centre.</li>
+            <li>Pick up the spring scale and drag it around the table.</li>
+            <li>Find the spot where the ring returns to centre.</li>
+            <li>Record the Force and Angle below as your Case A result.</li>
+        </ol>
+        <p class="hint">Everything on the table (pulleys, masses, the scale) can be picked up and moved: gravity and friction hold each one wherever you set it down.</p>
         </section>
 
         <section class="panel-section readings">
-            <h2>Live Reading</h2>
-            <div class="reading-row">
-                <span>Step</span>
-                <span id="hud-step-value" class="mono">idle</span>
-            </div>
-            <div class="reading-row">
-                <span>Force</span>
-                <span id="hud-force-value" class="mono">0 N</span>
-            </div>
-            <div class="reading-row">
-                <span>Angle</span>
-                <span id="hud-angle-value" class="mono">0°</span>
-            </div>
+        <h2>Live Reading</h2>
+        <div class="reading-row">
+            <span>Step</span>
+            <span id="hud-step-value" class="mono">idle</span>
+        </div>
+        <div class="reading-row">
+            <span>Force</span>
+            <span id="hud-force-value" class="mono">0 N</span>
+        </div>
+        <div class="reading-row">
+            <span>Angle</span>
+            <span id="hud-angle-value" class="mono">0°</span>
+        </div>
+        </section>
+
+        <section class="panel-section">
+        <h2>Settings</h2>
+        <label class="setting-row">
+            <span>Move speed</span>
+            <input type="range" id="setting-move-speed" min="20" max="150" value="65" step="5">
+        </label>
+        <label class="setting-row">
+            <span>Look speed</span>
+            <input type="range" id="setting-look-speed" min="0.2" max="3" value="1" step="0.1">
+        </label>
+        <p class="hint">Click the 3D view first to look around with the mouse (press Escape to get your cursor back).</p>
         </section>
     </aside>
 
-  <!-- Gravity  -->
-  <a-scene physics="gravity: -9.8; debug: false"
-           cursor="rayOrigin: mouse"
-           raycaster="objects: .interactive">
+    <a-scene physics="gravity: -9.8; debug: false"
+            cursor="rayOrigin: mouse"
+            raycaster="objects: .interactive">
 
-    <a-assets>
+        <a-assets>
         <img id="platform-texture" src="assets/textures/force-table.png" crossorigin="anonymous">
-    </a-assets>
+        </a-assets>
 
-    <!-- Camera stands at a lab bench, looking down at the table. -->
-    <a-entity id="rig"
-              camera
-              position="0 1.6 0.4"
-              rotation="-35 0 0"
-              look-controls
-              wasd-controls="enabled: true">
-    </a-entity>
+        <!-- Camera stands at a lab bench -->
+        <a-entity id="rig"
+        camera
+        position="0 1.6 0.4"
+        rotation="-35 0 0"
+        adjustable-look
+        wasd-controls="enabled: true; acceleration: 65">
 
-    <a-entity light="type: ambient; intensity: 0.7"></a-entity>
-    <a-entity light="type: directional; intensity: 0.6" position="1 2 1"></a-entity>
+        <!-- Camera-attached HUD -->
+        <a-plane width="0.5" height="0.17" color="#FFFFFF" opacity="0.88"
+                position="0 -0.33 -0.6"></a-plane>
+        <a-text id="hud3d-connection" value="Status: Offline" align="center"
+                color="#9F2F2D" width="0.44" wrap-count="36"
+                position="0 -0.285 -0.599"></a-text>
+        <a-text id="hud3d-readout" value="Step: idle
+    Force: 0 N
+    Angle: 0 deg" align="center" color="#2F3437" width="0.44" wrap-count="42"
+                line-height="30" font="monoid"
+                position="0 -0.365 -0.599"></a-text>
+        </a-entity>
 
-    <!-- The table surface. A short cylinder rather than a flat circle so
-         it has real volume for static-body to collide against (a
-         zero-thickness shape is a degenerate collider). Lives directly
-         at scene root, not nested under anything: aframe-physics-system
-         has a documented history of mispositioning bodies nested under
-         a transformed parent (n5ro/aframe-physics-system issues #18,
-         #158), and everything on this table now needs a working body,
-         so nothing physics-relevant is nested in this build any more.
-         See BUILD-LOG.md decision log. -->
-    <a-cylinder id="force-platform" radius="0.35" height="0.02"
-                position="0 0.9 -0.6"
-                material="src: #platform-texture"
-                static-body="shape: cylinder; cylinderAxis: y; friction: 0.6">
-    </a-cylinder>
+        <a-entity light="type: ambient; intensity: 0.7"></a-entity>
+        <a-entity light="type: directional; intensity: 0.6" position="1 2 1"></a-entity>
 
-    <!-- Central post: purely decorative, no body, no interaction. -->
-    <a-cylinder radius="0.012" height="0.03" color="#2a2a2a"
-                position="0 0.925 -0.6">
-    </a-cylinder>
+        <!-- Floor -->
+        <a-box width="8" height="0.05" depth="8" color="#cfcdc7"
+            position="0 -0.025 -0.6"
+            static-body="shape: box">
+        </a-box>
 
-    <!-- Invisible anchor the ring's spring pulls toward, at the ring's
-         expected resting height on the table surface. -->
-    <a-entity id="platform-anchor"
-              position="0 0.94 -0.6"
-              geometry="primitive: sphere; radius: 0.01"
-              material="opacity: 0"
-              static-body="shape: sphere; sphereRadius: 0.01">
-    </a-entity>
+        <!-- Lab desk -->
+        <a-box width="1.3" height="0.06" depth="1.1" color="#262523"
+            position="0 0.86 -0.6"
+            static-body="shape: box; friction: 0.6">
+        </a-box>
+        <a-box width="0.04" height="0.83" depth="0.04" color="#3a3a3a"
+            position="0.58 0.415 -1.08" static-body="shape: box"></a-box>
+        <a-box width="0.04" height="0.83" depth="0.04" color="#3a3a3a"
+            position="-0.58 0.415 -1.08" static-body="shape: box"></a-box>
+        <a-box width="0.04" height="0.83" depth="0.04" color="#3a3a3a"
+            position="0.58 0.415 -0.12" static-body="shape: box"></a-box>
+        <a-box width="0.04" height="0.83" depth="0.04" color="#3a3a3a"
+            position="-0.58 0.415 -0.12" static-body="shape: box"></a-box>
 
-    <!-- The ring: genuinely physics-driven. dynamic-body gives it real
-         mass and lets gravity/friction/collision settle it onto the
-         table; the spring component supplies the centre-seeking pull
-         (standing in for taut strings only being able to pull, not
-         push); force-ring.js applies the known tensions + live scale
-         force each tick, in the table's horizontal plane (world X/Z). -->
-    <a-torus id="ring" radius="0.03" radius-tubular="0.006"
-             color="#C4C3BE" position="0 0.94 -0.6"
-             dynamic-body="shape: sphere; sphereRadius: 0.03; mass: 0.01; friction: 0.1; linearDamping: 0.5"
-             spring="target: #platform-anchor; stiffness: 40; damping: 1.2"
-             force-ring>
-    </a-torus>
+        <!-- The table surface. A short cylinder rather than a flat circle so
+            it has real volume for static-body to collide against (a
+            zero-thickness shape is a degenerate collider). Lives directly
+            at scene root, not nested under anything: aframe-physics-system
+            has a documented history of mispositioning bodies nested under
+            a transformed parent (n5ro/aframe-physics-system issues #18,
+            #158), and everything on this table now needs a working body,
+            so nothing physics-relevant is nested in this build any more.
+            See BUILD-LOG.md decision log. -->
+        <a-cylinder id="force-platform" radius="0.35" height="0.02"
+                    position="0 0.9 -0.6"
+                    material="src: #platform-texture"
+                    static-body="shape: cylinder; cylinderAxis: y; friction: 0.6">
+        </a-cylinder>
 
-    <!-- Pulley 1: Case A, 200g @ 30 deg (manual Table 5.1). Grabbable
-         and physics-affected like everything else on the table now;
-         the tension the ring feels still comes from the fixed Case A
-         data (js/data/experiment-cases.js), not from wherever this prop
-         currently sits, to keep the core exercise's answer well-defined.
-         See BUILD-LOG.md decision log. -->
-    <a-cylinder id="pulley-1" class="interactive" radius="0.022" height="0.012"
-                color="#1a1a1a" position="0.2425 0.93 -0.74"
-                dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5"
-                grabbable>
-    </a-cylinder>
-    <a-text value="200 g @ 30 deg" align="center" color="#2F3437" width="0.9"
-            position="0.2425 0.95 -0.74" look-at="#rig"></a-text>
+        <!-- Central post: purely decorative, no body, no interaction. -->
+        <a-cylinder radius="0.012" height="0.03" color="#2a2a2a"
+                    position="0 0.925 -0.6">
+        </a-cylinder>
 
-    <!-- Pulley 2: Case A, 200g @ 120 deg -->
-    <a-cylinder id="pulley-2" class="interactive" radius="0.022" height="0.012"
-                color="#1a1a1a" position="-0.14 0.93 -0.8425"
-                dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5"
-                grabbable>
-    </a-cylinder>
-    <a-text value="200 g @ 120 deg" align="center" color="#2F3437" width="0.9"
-            position="-0.14 0.95 -0.8425" look-at="#rig"></a-text>
+        <!-- Invisible anchor the ring's spring pulls toward, at the ring's
+            expected resting height on the table surface. -->
+        <a-entity id="platform-anchor"
+                position="0 0.94 -0.6"
+                geometry="primitive: sphere; radius: 0.01"
+                material="opacity: 0"
+                static-body="shape: sphere; sphereRadius: 0.01">
+        </a-entity>
 
-    <!-- Hanging-mass props: real 200g dynamic-body weights the student
-         can pick up and inspect, sitting near their pulley. -->
-    <a-cylinder id="mass-1" class="interactive" radius="0.022" height="0.03"
-                color="#8f8e89" position="0.2771 0.925 -0.76"
-                dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6"
-                grabbable>
-    </a-cylinder>
-    <a-cylinder id="mass-2" class="interactive" radius="0.022" height="0.03"
-                color="#8f8e89" position="-0.16 0.925 -0.8771"
-                dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6"
-                grabbable>
-    </a-cylinder>
+        <!-- The ring -->
+        <a-torus id="ring" radius="0.03" radius-tubular="0.006"
+                color="#C4C3BE" position="0 0.94 -0.6"
+                dynamic-body="shape: sphere; sphereRadius: 0.03; mass: 0.01; friction: 0.1; linearDamping: 0.5"
+                spring="target: #platform-anchor; stiffness: 40; damping: 1.2"
+                force-ring>
+        </a-torus>
 
-    <!-- The spring scale -->
-    <a-box id="spring-scale" class="interactive"
-           width="0.09" height="0.024" depth="0.016" color="#E5E4DF"
-           position="-0.141 0.922 -0.549"
-           dynamic-body="shape: box; mass: 0.05; friction: 0.4"
-           grabbable
-           spring-scale="platformSelector: #force-platform">
-    </a-box>
-    <a-text value="spring scale" align="center" color="#2F3437" width="0.8"
-            position="-0.141 0.94 -0.549" look-at="#rig"></a-text>
+        <!-- Pulley 1 -->
+        <a-cylinder id="pulley-1" class="interactive" radius="0.022" height="0.012"
+                    color="#1a1a1a" position="0.2425 0.93 -0.74"
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5"
+                    grabbable>
+        </a-cylinder>
 
-    <!-- Strings  -->
-    <a-entity string-line="from: #ring; to: #pulley-1"></a-entity>
-    <a-entity string-line="from: #ring; to: #pulley-2"></a-entity>
-    <a-entity string-line="from: #ring; to: #spring-scale"></a-entity>
+        <!-- Pulley 2 -->
+        <a-cylinder id="pulley-2" class="interactive" radius="0.022" height="0.012"
+                    color="#1a1a1a" position="-0.14 0.93 -0.8425"
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5"
+                    grabbable>
+        </a-cylinder>
 
-    <!-- In-world console -->
-    <a-plane width="0.54" height="0.7" color="#EAEAEA"
-             position="-0.55 1.32 -0.902" rotation="0 15 0"></a-plane>
-    <a-plane width="0.5" height="0.66" color="#FFFFFF"
-             position="-0.55 1.32 -0.9" rotation="0 15 0"></a-plane>
+        <!-- Hanging-mass props -->
+        <a-cylinder id="mass-1" class="interactive" radius="0.022" height="0.03"
+                    color="#8f8e89" position="0.2771 0.925 -0.76"
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6"
+                    grabbable>
+        </a-cylinder>
+        <a-cylinder id="mass-2" class="interactive" radius="0.022" height="0.03"
+                    color="#8f8e89" position="-0.16 0.925 -0.8771"
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6"
+                    grabbable>
+        </a-cylinder>
 
-    <a-text value="PHYS 124: Vector Addition of Forces" align="center"
-            color="#2F3437" width="0.46" wrap-count="26"
-            position="-0.55 1.58 -0.899" rotation="0 15 0"></a-text>
+        <!-- The spring scale -->
+        <a-box id="spring-scale" class="interactive"
+            width="0.09" height="0.024" depth="0.016" color="#E5E4DF"
+            position="-0.141 0.922 -0.549"
+            dynamic-body="shape: box; mass: 0.05; friction: 0.4"
+            grabbable
+            spring-scale="platformSelector: #force-platform">
+        </a-box>
 
-    <a-text id="hud3d-connection" value="Status: Offline" align="center"
-            color="#9F2F2D" width="0.4" wrap-count="30"
-            position="-0.55 1.53 -0.899" rotation="0 15 0"></a-text>
+        <!-- Strings -->
+        <a-entity string-line="from: #ring; to: #pulley-1"></a-entity>
+        <a-entity string-line="from: #ring; to: #pulley-2"></a-entity>
+        <a-entity string-line="from: #ring; to: #spring-scale"></a-entity>
 
-    <a-text value="What to do:
-1. Two 200g masses pull the ring off centre.
-2. Pick up the spring scale.
-3. Drag it until the ring re-centres.
-4. Record the Force + Angle below."
-            align="left" color="#2F3437" width="0.42" wrap-count="28"
-            line-height="42"
-            position="-0.75 1.46 -0.899" rotation="0 15 0"></a-text>
+        <!-- LEFT sign: "How to Play." -->
+        <a-plane width="0.58" height="0.85" color="#EAEAEA"
+                position="-0.62 1.32 -0.902" rotation="0 15 0"></a-plane>
+        <a-plane width="0.54" height="0.81" color="#FFFFFF"
+                position="-0.62 1.32 -0.9" rotation="0 15 0"></a-plane>
 
-    <a-text id="hud3d-readout" value="Step: idle
-Force: 0 N
-Angle: 0 deg"
-            align="left" color="#2F3437" width="0.42" wrap-count="28"
-            line-height="46" font="monoid"
-            position="-0.75 1.12 -0.899" rotation="0 15 0"></a-text>
+        <a-text value="How to Play" align="center" color="#2F3437"
+                width="0.5" wrap-count="16"
+                position="-0.62 1.66 -0.899" rotation="0 15 0"></a-text>
 
-  </a-scene>
+        <a-text value="MOVE: W A S D
+    LOOK: move the mouse
+    GRAB: click and hold
+    DROP: let go
 
-  <script type="module" src="js/main.js"></script>
+    ON THE TABLE:
+    Pulley = pulls the ring
+    Weight = 200 grams
+    Spring Scale = your tool"
+                align="left" color="#2F3437" width="0.48" wrap-count="26"
+                line-height="40"
+                position="-0.85 1.55 -0.899" rotation="0 15 0"></a-text>
+
+        <!-- RIGHT sign: "Your Task," -->
+        <a-plane width="0.58" height="0.65" color="#EAEAEA"
+                position="0.62 1.32 -0.902" rotation="0 -15 0"></a-plane>
+        <a-plane width="0.54" height="0.61" color="#FFFFFF"
+                position="0.62 1.32 -0.9" rotation="0 -15 0"></a-plane>
+
+        <a-text value="Your Task" align="center" color="#2F3437"
+                width="0.5" wrap-count="14"
+                position="0.62 1.56 -0.899" rotation="0 -15 0"></a-text>
+
+        <a-text value="1. Grab the Spring Scale
+    2. Drag it around
+    3. Watch the silver ring
+    4. Stop at the middle
+    5. Read your numbers
+    6. Write them down. Done!"
+                align="left" color="#2F3437" width="0.48" wrap-count="26"
+                line-height="40"
+                position="0.39 1.46 -0.899" rotation="0 -15 0"></a-text>
+
+    </a-scene>
+
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

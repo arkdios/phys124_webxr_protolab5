@@ -1,4 +1,4 @@
- :root {
+:root {
   /* Warm monochrome palette */
   --color-bg: #fbfbfa;
   --color-surface: #ffffff;
@@ -41,6 +41,7 @@ body {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* ultra-diffuse, low opacity */
+  pointer-events: none; /* let clicks reach the 3D scene underneath, even where this panel overlaps it */
 }
 
 .panel-header h1 {
@@ -131,6 +132,22 @@ body {
   font-size: 12px;
   line-height: 1.5;
   color: var(--color-text-muted);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.setting-row input[type="range"] {
+  width: 120px;
+  accent-color: var(--pastel-blue-text);
+  pointer-events: auto; /* #lab-console disables pointer-events for the panel as a whole; re-enable it just for the sliders */
 }
 
 .reading-row {
