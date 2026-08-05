@@ -22,6 +22,17 @@ if (!AFRAME.components["force-ring"]) {
         init() {
         this.wasBalanced = false;
         this.latestScaleVector = { x: 0, y: 0 };
+    
+        // #platform-anchor needs a real body for the 'spring' component to
+        // attach to, but its collision shape would otherwise physically
+        // shove the ring away right as it approaches centre -- exactly
+        // where the balance check needs it to be able to go. Disabling
+        // collisionResponse keeps the body (and the spring constraint)
+        // without the contact push.
+        const anchorEl = document.querySelector("#platform-anchor");
+        anchorEl.addEventListener("body-loaded", () => {
+            anchorEl.body.collisionResponse = false;
+        });
 
         // The two known (fixed) hanging-mass forces for the active case,
         // converted from (mass, angle) to (x, y) once at init. These don't
@@ -55,7 +66,7 @@ if (!AFRAME.components["force-ring"]) {
 
         // The spring component (index.html) already applies the
         // centre-seeking restoring force every tick on its own, in all 3
-        // axes -- but since the anchor sits at the ring's own resting
+        // axes, but since the anchor sits at the ring's own resting
         // height, its vertical pull is near-zero once gravity has settled
         // the ring onto the table, leaving the horizontal (X/Z) pull as
         // the meaningful part. This adds the two known tensions plus
@@ -71,7 +82,7 @@ if (!AFRAME.components["force-ring"]) {
         );
 
         const isBalanced = distance < BALANCE_TOLERANCE_M;
-        // Only fire the LabState transition on the *edge* (unbalanced -> balanced),
+        // Only fire the LabState transition on the edge (unbalanced -> balanced),
         // not every frame the ring happens to sit near centre. Otherwise this
         // would spam the durable event log every ~16ms while balanced.
         if (isBalanced && !this.wasBalanced) {

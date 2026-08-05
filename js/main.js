@@ -1,3 +1,4 @@
+import "./components/adjustable-look.js";
 import "./components/grabbable.js";
 import "./components/spring-scale.js";
 import "./components/force-ring.js";
@@ -5,6 +6,7 @@ import "./components/string-line.js";
 import { LabState } from "./lab-state.js";
 import { init as initBackend, onConnectionChange } from "./network/hybrid-client.js";
 import { initSceneHud } from "./ui/scene-hud.js";
+import { initSettingsPanel } from "./ui/settings-panel.js";
 
 // No live backend yet (open item #4 is now resolved as hybrid WebSocket
 // + REST. This flag short-circuits every network call in rest-client.js and
@@ -20,6 +22,7 @@ const panel = {
 };
 
 const sceneHud = initSceneHud();
+initSettingsPanel();
 
 // Merged local copy of the same two data sources the flat panel reads
 // (LabState's step, and spring-scale.js's reading-update event), so the

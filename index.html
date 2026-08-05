@@ -11,7 +11,7 @@
 
     <!-- A-Frame core + physics -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.2.2/dist/aframe-physics-system.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.4/dist/aframe-physics-system.min.js"></script>
 
     <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -34,7 +34,7 @@
             <li>Find the spot where the ring returns to centre.</li>
             <li>Record the Force and Angle below as your Case A result.</li>
         </ol>
-        <p class="hint">Everything on the table (pulleys, masses, the scale) can be picked up and moved: gravity and friction hold each one wherever you set it down.</p>
+        <p class="hint">The spring scale can be picked up and dragged anywhere on the table: gravity and friction hold it wherever you let go. The pulleys and hanging weights stay fixed for Case A.</p>
         </section>
 
         <section class="panel-section readings">
@@ -67,9 +67,10 @@
         </section>
     </aside>
 
-    <a-scene physics="gravity: -9.8; debug: false"
+    <a-scene physics="gravity: -9.81; debug: false"
             cursor="rayOrigin: mouse"
-            raycaster="objects: .interactive">
+            raycaster="objects: .interactive"
+            vr-mode-ui="enabled: false">
 
         <a-assets>
         <img id="platform-texture" src="assets/textures/force-table.png" crossorigin="anonymous">
@@ -146,34 +147,30 @@
         <a-torus id="ring" radius="0.03" radius-tubular="0.006"
                 color="#C4C3BE" position="0 0.94 -0.6"
                 dynamic-body="shape: sphere; sphereRadius: 0.03; mass: 0.01; friction: 0.1; linearDamping: 0.5"
-                spring="target: #platform-anchor; stiffness: 40; damping: 1.2"
+                spring="target: #platform-anchor; restLength: 0; stiffness: 40; damping: 1.2"
                 force-ring>
         </a-torus>
 
         <!-- Pulley 1 -->
-        <a-cylinder id="pulley-1" class="interactive" radius="0.022" height="0.012"
+        <a-cylinder id="pulley-1" radius="0.022" height="0.012"
                     color="#1a1a1a" position="0.2425 0.93 -0.74"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5"
-                    grabbable>
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5">
         </a-cylinder>
 
         <!-- Pulley 2 -->
-        <a-cylinder id="pulley-2" class="interactive" radius="0.022" height="0.012"
+        <a-cylinder id="pulley-2" radius="0.022" height="0.012"
                     color="#1a1a1a" position="-0.14 0.93 -0.8425"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5"
-                    grabbable>
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5">
         </a-cylinder>
 
         <!-- Hanging-mass props -->
-        <a-cylinder id="mass-1" class="interactive" radius="0.022" height="0.03"
+        <a-cylinder id="mass-1" radius="0.022" height="0.03"
                     color="#8f8e89" position="0.2771 0.925 -0.76"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6"
-                    grabbable>
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6">
         </a-cylinder>
-        <a-cylinder id="mass-2" class="interactive" radius="0.022" height="0.03"
+        <a-cylinder id="mass-2" radius="0.022" height="0.03"
                     color="#8f8e89" position="-0.16 0.925 -0.8771"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6"
-                    grabbable>
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6">
         </a-cylinder>
 
         <!-- The spring scale -->
@@ -185,7 +182,7 @@
             spring-scale="platformSelector: #force-platform">
         </a-box>
 
-        <!-- Strings: -->
+        <!-- Strings -->
         <a-entity string-line="from: #ring; to: #pulley-1"></a-entity>
         <a-entity string-line="from: #ring; to: #pulley-2"></a-entity>
         <a-entity string-line="from: #ring; to: #spring-scale"></a-entity>

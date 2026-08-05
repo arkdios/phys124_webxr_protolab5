@@ -1,9 +1,10 @@
-// Deliberately NOT camera-attached: a panel that follows your gaze
-// reads as "text glued to your face," a common VR comfort complaint.
-// This is a fixed object in the world, the same way a real lab's
-// wall-mounted instructions would be; the desktop-mode WASD/look
-// controls already let a student turn toward it like anything else on
-// the table.
+// Camera-attached by design: a persistent Force/Angle readout that stays
+// in view while the student is focused on the ring is more useful here
+// than a wall panel they'd have to turn away from mid-drag. Worth
+// revisiting once real headset testing starts -- head-locked UI is a
+// common VR comfort complaint, and the flat #lab-console panel already
+// covers this same information for anyone who'd rather not have it in
+// their view.
 
 export function initSceneHud() {
     const connectionText = document.querySelector("#hud3d-connection");

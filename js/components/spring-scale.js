@@ -32,12 +32,14 @@ if (!AFRAME.components["spring-scale"]) {
         },
 
         init() {
-        this.lastSentAt = 0;
-
-        this.onGrabEnd = this.onGrabEnd.bind(this);
-        this.el.addEventListener("grab-end", this.onGrabEnd);
-
-        this.addCosmeticDetails();
+            this.lastSentAt = 0;
+            this.platformPos = new THREE.Vector3();
+            this.myPos = new THREE.Vector3();
+    
+            this.onGrabEnd = this.onGrabEnd.bind(this);
+            this.el.addEventListener("grab-end", this.onGrabEnd);
+    
+            this.addCosmeticDetails();
         },
 
         addCosmeticDetails() {
@@ -80,19 +82,16 @@ if (!AFRAME.components["spring-scale"]) {
         // reserved for height/gravity.
         computeReading() {
         const platformEl = this.data.platformSelector;
-        const platformPos = new THREE.Vector3();
-        platformEl.object3D.getWorldPosition(platformPos);
-
-        const myPos = new THREE.Vector3();
-        this.el.object3D.getWorldPosition(myPos);
+        platformEl.object3D.getWorldPosition(this.platformPos);
+        this.el.object3D.getWorldPosition(this.myPos);
 
         // world_z = table.z - radius * sin(angle) is the mapping used for
         // every object's position in index.html; this is that mapping's
         // inverse, recovering the abstract (x, y) vector from a world
         // (X, Z) offset.
         const rawOffsetMeters = {
-            x: (myPos.x - platformPos.x) / METERS_PER_NEWTON,
-            y: -(myPos.z - platformPos.z) / METERS_PER_NEWTON,
+            x: (this.myPos.x - this.platformPos.x) / METERS_PER_NEWTON,
+            y: -(this.myPos.z - this.platformPos.z) / METERS_PER_NEWTON,
         };
 
         const rawMagnitude = vectorMagnitude(rawOffsetMeters);

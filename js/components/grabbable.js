@@ -15,6 +15,7 @@ if (!AFRAME.components["grabbable"]) {
             this.dragPlane = new THREE.Plane();
             this.intersectionPoint = new THREE.Vector3();
             this.raycaster = new THREE.Raycaster();
+            this.mouseNDC = new THREE.Vector2();
 
             // Bind once so add/removeEventListener reference the same function.
             this.onMouseDown = this.onMouseDown.bind(this);
@@ -28,6 +29,7 @@ if (!AFRAME.components["grabbable"]) {
             console.log("[grabbable] mousedown on", this.el.id || this.el.tagName);
 
             this.isGrabbed = true;
+            this.el.sceneEl.isDraggingObject = true; // tells adjustable-look to ignore this drag
             this.el.emit("grab-start", null, false);
 
             const camera = this.el.sceneEl.camera;
@@ -53,15 +55,15 @@ if (!AFRAME.components["grabbable"]) {
         },
 
         onMouseMove(evt) {
-            if (!this.isGrabbed) return;
+            if (!this.isDragging || this.el.sceneEl.isDraggingObject) return;
 
             const camera = this.el.sceneEl.camera;
-            const mouseNDC = new THREE.Vector2(
+            this.mouseNDC.set(
                 (evt.clientX / window.innerWidth) * 2 - 1,
                 -(evt.clientY / window.innerHeight) * 2 + 1
             );
 
-            this.raycaster.setFromCamera(mouseNDC, camera);
+            this.raycaster.setFromCamera(this.mouseNDC, camera);
             const hit = this.raycaster.ray.intersectPlane(this.dragPlane, this.intersectionPoint);
 
             if (hit) {
@@ -83,6 +85,7 @@ if (!AFRAME.components["grabbable"]) {
 
         onMouseUp() {
             this.isGrabbed = false;
+            this.el.sceneEl.isDraggingObject = false;
             this.el.emit("grab-end", null, false);
 
             // Hand control back to the physics engine: gravity, friction, and
