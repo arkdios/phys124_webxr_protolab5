@@ -14,8 +14,8 @@
     <script src="https://cdn.jsdelivr.net/npm/aframe-physics-system@4.2.2/dist/aframe-physics-system.min.js"></script>
 
     <link rel="stylesheet" href="css/style.css" />
-    </head>
-    <body>
+</head>
+<body>
 
     <aside id="lab-console">
         <header class="panel-header">
@@ -63,7 +63,7 @@
             <span>Look speed</span>
             <input type="range" id="setting-look-speed" min="0.2" max="3" value="1" step="0.1">
         </label>
-        <p class="hint">Click the 3D view first to look around with the mouse (press Escape to get your cursor back).</p>
+        <p class="hint">Click and hold anywhere in the 3D view, then drag to look around.</p>
         </section>
     </aside>
 
@@ -75,7 +75,9 @@
         <img id="platform-texture" src="assets/textures/force-table.png" crossorigin="anonymous">
         </a-assets>
 
-        <!-- Camera stands at a lab bench -->
+        <!-- Camera stands at a lab bench, looking down at the table.
+            adjustable-look replaces the built-in look-controls so mouse
+            sensitivity can be a user setting -->
         <a-entity id="rig"
         camera
         position="0 1.6 0.4"
@@ -84,16 +86,16 @@
         wasd-controls="enabled: true; acceleration: 65">
 
         <!-- Camera-attached HUD -->
-        <a-plane width="0.5" height="0.17" color="#FFFFFF" opacity="0.88"
-                position="0 -0.33 -0.6"></a-plane>
-        <a-text id="hud3d-connection" value="Status: Offline" align="center"
+        <a-plane width="0.5" height="0.22" color="#FFFFFF" opacity="0.88"
+                position="0 -0.34 -0.6"></a-plane>
+        <a-text id="hud3d-connection" value="Status: Offline" align="center" baseline="top"
                 color="#9F2F2D" width="0.44" wrap-count="36"
-                position="0 -0.285 -0.599"></a-text>
+                position="0 -0.25 -0.599"></a-text>
         <a-text id="hud3d-readout" value="Step: idle
     Force: 0 N
-    Angle: 0 deg" align="center" color="#2F3437" width="0.44" wrap-count="42"
-                line-height="30" font="monoid"
-                position="0 -0.365 -0.599"></a-text>
+    Angle: 0 deg" align="center" baseline="top" color="#2F3437" width="0.44" wrap-count="42"
+                font="monoid"
+                position="0 -0.305 -0.599"></a-text>
         </a-entity>
 
         <a-entity light="type: ambient; intensity: 0.7"></a-entity>
@@ -119,15 +121,7 @@
         <a-box width="0.04" height="0.83" depth="0.04" color="#3a3a3a"
             position="-0.58 0.415 -0.12" static-body="shape: box"></a-box>
 
-        <!-- The table surface. A short cylinder rather than a flat circle so
-            it has real volume for static-body to collide against (a
-            zero-thickness shape is a degenerate collider). Lives directly
-            at scene root, not nested under anything: aframe-physics-system
-            has a documented history of mispositioning bodies nested under
-            a transformed parent (n5ro/aframe-physics-system issues #18,
-            #158), and everything on this table now needs a working body,
-            so nothing physics-relevant is nested in this build any more.
-            See BUILD-LOG.md decision log. -->
+        <!-- The table surface -->
         <a-cylinder id="force-platform" radius="0.35" height="0.02"
                     position="0 0.9 -0.6"
                     material="src: #platform-texture"
@@ -191,23 +185,22 @@
             spring-scale="platformSelector: #force-platform">
         </a-box>
 
-        <!-- Strings -->
+        <!-- Strings: -->
         <a-entity string-line="from: #ring; to: #pulley-1"></a-entity>
         <a-entity string-line="from: #ring; to: #pulley-2"></a-entity>
         <a-entity string-line="from: #ring; to: #spring-scale"></a-entity>
 
         <!-- LEFT sign: "How to Play." -->
-        <a-plane width="0.58" height="0.85" color="#EAEAEA"
-                position="-0.62 1.32 -0.902" rotation="0 15 0"></a-plane>
-        <a-plane width="0.54" height="0.81" color="#FFFFFF"
-                position="-0.62 1.32 -0.9" rotation="0 15 0"></a-plane>
+        <a-entity position="-0.62 1.32 -0.9" rotation="0 15 0">
+        <a-plane width="0.6" height="0.88" color="#EAEAEA" position="0 0 -0.002"></a-plane>
+        <a-plane width="0.56" height="0.84" color="#FFFFFF" position="0 0 0"></a-plane>
 
-        <a-text value="How to Play" align="center" color="#2F3437"
+        <a-text value="How to Play" align="center" baseline="top" color="#2F3437"
                 width="0.5" wrap-count="16"
-                position="-0.62 1.66 -0.899" rotation="0 15 0"></a-text>
+                position="0 0.37 0.001"></a-text>
 
         <a-text value="MOVE: W A S D
-    LOOK: move the mouse
+    LOOK: click and drag
     GRAB: click and hold
     DROP: let go
 
@@ -215,19 +208,18 @@
     Pulley = pulls the ring
     Weight = 200 grams
     Spring Scale = your tool"
-                align="left" color="#2F3437" width="0.48" wrap-count="26"
-                line-height="40"
-                position="-0.85 1.55 -0.899" rotation="0 15 0"></a-text>
+                align="left" baseline="top" color="#2F3437" width="0.48" wrap-count="26"
+                position="-0.25 0.22 0.001"></a-text>
+        </a-entity>
 
         <!-- RIGHT sign: "Your Task," -->
-        <a-plane width="0.58" height="0.65" color="#EAEAEA"
-                position="0.62 1.32 -0.902" rotation="0 -15 0"></a-plane>
-        <a-plane width="0.54" height="0.61" color="#FFFFFF"
-                position="0.62 1.32 -0.9" rotation="0 -15 0"></a-plane>
+        <a-entity position="0.62 1.32 -0.9" rotation="0 -15 0">
+        <a-plane width="0.6" height="0.68" color="#EAEAEA" position="0 0 -0.002"></a-plane>
+        <a-plane width="0.56" height="0.64" color="#FFFFFF" position="0 0 0"></a-plane>
 
-        <a-text value="Your Task" align="center" color="#2F3437"
+        <a-text value="Your Task" align="center" baseline="top" color="#2F3437"
                 width="0.5" wrap-count="14"
-                position="0.62 1.56 -0.899" rotation="0 -15 0"></a-text>
+                position="0 0.27 0.001"></a-text>
 
         <a-text value="1. Grab the Spring Scale
     2. Drag it around
@@ -235,9 +227,9 @@
     4. Stop at the middle
     5. Read your numbers
     6. Write them down. Done!"
-                align="left" color="#2F3437" width="0.48" wrap-count="26"
-                line-height="40"
-                position="0.39 1.46 -0.899" rotation="0 -15 0"></a-text>
+                align="left" baseline="top" color="#2F3437" width="0.48" wrap-count="26"
+                position="-0.25 0.14 0.001"></a-text>
+        </a-entity>
 
     </a-scene>
 
