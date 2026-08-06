@@ -67,7 +67,7 @@
         </section>
     </aside>
 
-    <a-scene physics="gravity: -9.81; debug: false"
+    <a-scene physics="gravity: -9.81; debug: false; friction: 0.2; restitution: 0"
             cursor="rayOrigin: mouse"
             raycaster="objects: .interactive"
             vr-mode-ui="enabled: false">
@@ -80,11 +80,11 @@
             adjustable-look replaces the built-in look-controls so mouse
             sensitivity can be a user setting -->
         <a-entity id="rig"
-        camera
-        position="0 1.6 0.4"
-        rotation="-35 0 0"
-        adjustable-look
-        wasd-controls="enabled: true; acceleration: 65">
+                camera
+                position="0 1.6 0.4"
+                rotation="-35 0 0"
+                adjustable-look
+                wasd-controls="enabled: true; acceleration: 65">
 
         <!-- Camera-attached HUD -->
         <a-plane width="0.5" height="0.22" color="#FFFFFF" opacity="0.88"
@@ -111,7 +111,7 @@
         <!-- Lab desk -->
         <a-box width="1.3" height="0.06" depth="1.1" color="#262523"
             position="0 0.86 -0.6"
-            static-body="shape: box; friction: 0.6">
+            static-body="shape: box">
         </a-box>
         <a-box width="0.04" height="0.83" depth="0.04" color="#3a3a3a"
             position="0.58 0.415 -1.08" static-body="shape: box"></a-box>
@@ -126,7 +126,7 @@
         <a-cylinder id="force-platform" radius="0.35" height="0.02"
                     position="0 0.9 -0.6"
                     material="src: #platform-texture"
-                    static-body="shape: cylinder; cylinderAxis: y; friction: 0.6">
+                    static-body="shape: cylinder; cylinderAxis: y">
         </a-cylinder>
 
         <!-- Central post: purely decorative, no body, no interaction. -->
@@ -146,7 +146,7 @@
         <!-- The ring -->
         <a-torus id="ring" radius="0.03" radius-tubular="0.006"
                 color="#C4C3BE" position="0 0.94 -0.6"
-                dynamic-body="shape: sphere; sphereRadius: 0.03; mass: 0.01; friction: 0.1; linearDamping: 0.5"
+                dynamic-body="shape: sphere; sphereRadius: 0.03; mass: 0.01; linearDamping: 0.5"
                 spring="target: #platform-anchor; restLength: 0; stiffness: 40; damping: 1.2"
                 force-ring>
         </a-torus>
@@ -154,30 +154,30 @@
         <!-- Pulley 1 -->
         <a-cylinder id="pulley-1" radius="0.022" height="0.012"
                     color="#1a1a1a" position="0.2425 0.916 -0.74"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5">
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05">
         </a-cylinder>
 
         <!-- Pulley 2 -->
         <a-cylinder id="pulley-2" radius="0.022" height="0.012"
                     color="#1a1a1a" position="-0.14 0.916 -0.8425"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; friction: 0.5">
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05">
         </a-cylinder>
 
         <!-- Hanging-mass props -->
         <a-cylinder id="mass-1" radius="0.022" height="0.03"
                     color="#8f8e89" position="0.2771 0.925 -0.76"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6">
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2">
         </a-cylinder>
         <a-cylinder id="mass-2" radius="0.022" height="0.03"
                     color="#8f8e89" position="-0.16 0.925 -0.8771"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; friction: 0.6">
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2">
         </a-cylinder>
 
         <!-- The spring scale -->
         <a-box id="spring-scale" class="interactive"
             width="0.09" height="0.024" depth="0.016" color="#E5E4DF"
             position="-0.141 0.922 -0.549"
-            dynamic-body="shape: box; mass: 0.05; friction: 0.4"
+            dynamic-body="shape: box; mass: 0.05"
             grabbable
             spring-scale="platformSelector: #force-platform">
         </a-box>
