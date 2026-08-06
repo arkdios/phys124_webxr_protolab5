@@ -55,6 +55,15 @@ if (!AFRAME.components["grabbable"]) {
             // instead of a global that doesn't exist here.
             if (this.el.body) {
                 this.el.body.type = this.el.body.constructor.KINEMATIC;
+                // cannon-es still integrates position from velocity for
+                // KINEMATIC bodies (only gravity/damping skip them, not
+                // integration) -- checked directly in its integrate() source.
+                // Without this, whatever velocity the body had the instant
+                // it was grabbed keeps silently accumulating into its
+                // position every physics step, drifting it away from the
+                // cursor on its own. That's the stretch-then-vanish you saw.
+                this.el.body.velocity.set(0, 0, 0);
+                this.el.body.angularVelocity.set(0, 0, 0);
             }
 
             document.addEventListener("mousemove", this.onMouseMove);
@@ -99,6 +108,8 @@ if (!AFRAME.components["grabbable"]) {
             // collision with the table now determine what happens next.
             if (this.el.body) {
                 this.el.body.type = this.el.body.constructor.DYNAMIC;
+                this.el.body.velocity.set(0, 0, 0);
+                this.el.body.angularVelocity.set(0, 0, 0);
                 this.el.body.wakeUp?.();
             }
 
