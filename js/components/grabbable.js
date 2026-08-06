@@ -55,7 +55,7 @@ if (!AFRAME.components["grabbable"]) {
         },
 
         onMouseMove(evt) {
-            if (!this.isDragging || this.el.sceneEl.isDraggingObject) return;
+            if (!this.isGrabbed) return;
 
             const camera = this.el.sceneEl.camera;
             this.mouseNDC.set(

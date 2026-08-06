@@ -56,7 +56,7 @@ if (!AFRAME.components["adjustable-look"]) {
         },
     
         onMouseMove(evt) {
-            if (!this.isDragging) return;
+            if (!this.isDragging || this.el.sceneEl.isDraggingObject) return;
     
             const dx = evt.clientX - this.lastX;
             const dy = evt.clientY - this.lastY;
