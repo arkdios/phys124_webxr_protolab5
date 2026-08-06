@@ -8,6 +8,8 @@
 // takes the whole scene down with it. Registering only once, and skipping
 // silently on a re-run, makes that failure mode a no-op instead of a crash.
 
+import { setDraggingObject } from "../interaction-state.js";
+
 if (!AFRAME.components["grabbable"]) {
     AFRAME.registerComponent("grabbable", {
         init() {
@@ -29,7 +31,7 @@ if (!AFRAME.components["grabbable"]) {
             console.log("[grabbable] mousedown on", this.el.id || this.el.tagName);
 
             this.isGrabbed = true;
-            this.el.sceneEl.isDraggingObject = true; // tells adjustable-look to ignore this drag
+            setDraggingObject(true); // tells adjustable-look to ignore this drag
             this.el.emit("grab-start", null, false);
 
             const camera = this.el.sceneEl.camera;
@@ -45,9 +47,14 @@ if (!AFRAME.components["grabbable"]) {
             // should never move this on its own," which is what we want while
             // the mouse is directly controlling position. No-ops harmlessly if
             // this particular entity has no body at all.
-            const CANNON = AFRAME.CANNON;
-            if (this.el.body && CANNON) {
-                this.el.body.type = CANNON.Body.KINEMATIC;
+            //
+            // AFRAME.CANNON isn't exposed by this physics driver -- checked
+            // against its source, which keeps its cannon-es import
+            // module-local and never attaches it to the AFRAME namespace --
+            // so this reads KINEMATIC/DYNAMIC off the body's own constructor
+            // instead of a global that doesn't exist here.
+            if (this.el.body) {
+                this.el.body.type = this.el.body.constructor.KINEMATIC;
             }
 
             document.addEventListener("mousemove", this.onMouseMove);
@@ -85,25 +92,24 @@ if (!AFRAME.components["grabbable"]) {
 
         onMouseUp() {
             this.isGrabbed = false;
-            this.el.sceneEl.isDraggingObject = false;
+            setDraggingObject(false);
             this.el.emit("grab-end", null, false);
 
             // Hand control back to the physics engine: gravity, friction, and
             // collision with the table now determine what happens next.
-            const CANNON = AFRAME.CANNON;
-            if (this.el.body && CANNON) {
-                this.el.body.type = CANNON.Body.DYNAMIC;
+            if (this.el.body) {
+                this.el.body.type = this.el.body.constructor.DYNAMIC;
                 this.el.body.wakeUp?.();
             }
 
             document.removeEventListener("mousemove", this.onMouseMove);
             document.removeEventListener("mouseup", this.onMouseUp);
-          },
+        },
 
-          remove() {
-              this.el.removeEventListener("mousedown", this.onMouseDown);
-              document.removeEventListener("mousemove", this.onMouseMove);
-              document.removeEventListener("mouseup", this.onMouseUp);
+        remove() {
+            this.el.removeEventListener("mousedown", this.onMouseDown);
+            document.removeEventListener("mousemove", this.onMouseMove);
+            document.removeEventListener("mouseup", this.onMouseUp);
         },
     });
 }

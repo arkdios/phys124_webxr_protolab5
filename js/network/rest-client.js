@@ -41,7 +41,11 @@ export async function createSession(studentContext = {}) {
  */
 export async function postLabEvent(payload) {
     if (window.__LAB_BACKEND_DISABLED__) {
-        console.log("[rest-client] disabled — would have POSTed:", payload);
+        // console.debug, not console.log: this fires on every throttled
+        // spring-scale reading as long as the stub is active, and at
+        // console.log level it buries anything else you're trying to
+        // debug. Still visible with the console's "Verbose" filter on.
+        console.debug("[rest-client] disabled — would have POSTed:", payload);
         return { ok: true, stub: true };
     }
 

@@ -37,7 +37,7 @@ export const EXPERIMENT_CASES = {
     },
 };
 
-    export const GRAVITY_M_S2 = 9.81;
+export const GRAVITY_M_S2 = 9.81;
     
-    // only Case A is built into the scene right now.
-    export const ACTIVE_CASE_KEY = "A";
+// only Case A is built into the scene right now.
+export const ACTIVE_CASE_KEY = "A";

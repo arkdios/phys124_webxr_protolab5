@@ -10,6 +10,8 @@
 // a proper VR-aware fork of this component) is the right choice again
 // at that point.
 
+import { isDraggingObject } from "../interaction-state.js";
+
 if (!AFRAME.components["adjustable-look"]) {
     AFRAME.registerComponent("adjustable-look", {
         schema: {
@@ -56,7 +58,7 @@ if (!AFRAME.components["adjustable-look"]) {
         },
     
         onMouseMove(evt) {
-            if (!this.isDragging || this.el.sceneEl.isDraggingObject) return;
+            if (!this.isDragging || isDraggingObject()) return;
     
             const dx = evt.clientX - this.lastX;
             const dy = evt.clientY - this.lastY;
