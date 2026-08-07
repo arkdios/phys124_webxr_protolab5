@@ -43,12 +43,19 @@ if (!AFRAME.components["grabbable"]) {
                 -(evt.clientY / window.innerHeight) * 2 + 1
             );
             this.raycaster.setFromCamera(this.mouseNDC, camera);
-
-            // true = recursive, so this still catches clicks on the little
-            // cosmetic sub-meshes spring-scale.js adds as children.
             const hits = this.raycaster.intersectObject(this.el.object3D, true);
-            if (hits.length === 0) return; // this click didn't land on this entity
-
+        
+            // TEMP DIAGNOSTIC — remove once dragging is confirmed working.
+            console.log(
+                "[grabbable/debug]", this.el.id || this.el.tagName,
+                "client:", evt.clientX, evt.clientY,
+                "ndc:", this.mouseNDC.x.toFixed(3), this.mouseNDC.y.toFixed(3),
+                "hits:", hits.length,
+                hits.length ? hits[0].object.name || hits[0].object.type : "(none)"
+            );
+        
+            if (hits.length === 0) return;
+        
             console.log("[grabbable] mousedown on", this.el.id || this.el.tagName);
 
             this.isGrabbed = true;
