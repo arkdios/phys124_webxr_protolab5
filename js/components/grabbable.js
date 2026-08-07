@@ -10,8 +10,8 @@
 
 import { setDraggingObject } from "../interaction-state.js";
 
-if (!AFRAME.components["grabbable"]) {
-    AFRAME.registerComponent("grabbable", {
+if (!AFRAME.components["mouse-grabbable"]) {
+    AFRAME.registerComponent("mouse-grabbable", {
         init() {
             // TEMP DIAGNOSTIC — remove once dragging is confirmed working.
             console.log("[grabbable/debug] init() called on", this.el.id || this.el.tagName);
