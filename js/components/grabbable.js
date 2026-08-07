@@ -25,19 +25,39 @@ if (!AFRAME.components["mouse-grabbable"]) {
             this.onMouseDown = this.onMouseDown.bind(this);
             this.onMouseMove = this.onMouseMove.bind(this);
             this.onMouseUp = this.onMouseUp.bind(this);
+            this.onHoverMove = this.onHoverMove.bind(this);
         
             this.canvas = this.el.sceneEl.canvas;
             if (this.canvas) {
                 console.log("[grabbable/debug] canvas found synchronously, attaching listener for", this.el.id);
                 this.canvas.addEventListener("mousedown", this.onMouseDown);
+                this.canvas.addEventListener("mousemove", this.onHoverMove);
             } else {
                 console.log("[grabbable/debug] canvas not ready yet, waiting on render-target-loaded for", this.el.id);
                 this.el.sceneEl.addEventListener("render-target-loaded", () => {
                     this.canvas = this.el.sceneEl.canvas;
                     console.log("[grabbable/debug] render-target-loaded fired, attaching listener for", this.el.id);
                     this.canvas.addEventListener("mousedown", this.onMouseDown);
+                    this.canvas.addEventListener("mousemove", this.onHoverMove);
                 });
             }
+        },
+
+        // Cursor feedback while just moving the mouse (not dragging).
+        // Assumes a single grabbable entity on the page — with two or more,
+        // each instance would fight over canvas.style.cursor and this needs
+        // a shared "who currently owns the cursor" check instead.
+        onHoverMove(evt) {
+            if (this.isGrabbed) return; // onMouseDown already set "grabbing"
+
+            const camera = this.el.sceneEl.camera;
+            this.mouseNDC.set(
+                (evt.clientX / window.innerWidth) * 2 - 1,
+                -(evt.clientY / window.innerHeight) * 2 + 1
+            );
+            this.raycaster.setFromCamera(this.mouseNDC, camera);
+            const hits = this.raycaster.intersectObject(this.el.object3D, true);
+            this.canvas.style.cursor = hits.length ? "grab" : "default";
         },
 
         onMouseDown(evt) {
@@ -63,6 +83,7 @@ if (!AFRAME.components["mouse-grabbable"]) {
             console.log("[grabbable] mousedown on", this.el.id || this.el.tagName);
 
             this.isGrabbed = true;
+            this.canvas.style.cursor = "grabbing";
             setDraggingObject(true); // tells adjustable-look to ignore this drag
             this.el.emit("grab-start", null, false);
 
@@ -141,6 +162,8 @@ if (!AFRAME.components["mouse-grabbable"]) {
         remove() {
             if (this.canvas) {
                 this.canvas.removeEventListener("mousedown", this.onMouseDown);
+                this.canvas.removeEventListener("mousemove", this.onHoverMove);
+                this.canvas.style.cursor = "default";
             }
             document.removeEventListener("mousemove", this.onMouseMove);
             document.removeEventListener("mouseup", this.onMouseUp);
