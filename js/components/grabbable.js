@@ -13,24 +13,28 @@ import { setDraggingObject } from "../interaction-state.js";
 if (!AFRAME.components["grabbable"]) {
     AFRAME.registerComponent("grabbable", {
         init() {
+            // TEMP DIAGNOSTIC — remove once dragging is confirmed working.
+            console.log("[grabbable/debug] init() called on", this.el.id || this.el.tagName);
+        
             this.isGrabbed = false;
             this.dragPlane = new THREE.Plane();
             this.intersectionPoint = new THREE.Vector3();
             this.raycaster = new THREE.Raycaster();
             this.mouseNDC = new THREE.Vector2();
-
-            // Bind once so add/removeEventListener reference the same function.
+        
             this.onMouseDown = this.onMouseDown.bind(this);
             this.onMouseMove = this.onMouseMove.bind(this);
             this.onMouseUp = this.onMouseUp.bind(this);
-
-            // Listens on the canvas directly and hit-tests itself
+        
             this.canvas = this.el.sceneEl.canvas;
             if (this.canvas) {
+                console.log("[grabbable/debug] canvas found synchronously, attaching listener for", this.el.id);
                 this.canvas.addEventListener("mousedown", this.onMouseDown);
             } else {
+                console.log("[grabbable/debug] canvas not ready yet, waiting on render-target-loaded for", this.el.id);
                 this.el.sceneEl.addEventListener("render-target-loaded", () => {
                     this.canvas = this.el.sceneEl.canvas;
+                    console.log("[grabbable/debug] render-target-loaded fired, attaching listener for", this.el.id);
                     this.canvas.addEventListener("mousedown", this.onMouseDown);
                 });
             }
