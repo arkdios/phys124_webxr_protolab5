@@ -24,17 +24,37 @@ if (!AFRAME.components["grabbable"]) {
             this.onMouseMove = this.onMouseMove.bind(this);
             this.onMouseUp = this.onMouseUp.bind(this);
 
-            this.el.addEventListener("mousedown", this.onMouseDown);
+            // Listens on the canvas directly and hit-tests itself
+            this.canvas = this.el.sceneEl.canvas;
+            if (this.canvas) {
+                this.canvas.addEventListener("mousedown", this.onMouseDown);
+            } else {
+                this.el.sceneEl.addEventListener("render-target-loaded", () => {
+                    this.canvas = this.el.sceneEl.canvas;
+                    this.canvas.addEventListener("mousedown", this.onMouseDown);
+                });
+            }
         },
 
-        onMouseDown() {
+        onMouseDown(evt) {
+            const camera = this.el.sceneEl.camera;
+            this.mouseNDC.set(
+                (evt.clientX / window.innerWidth) * 2 - 1,
+                -(evt.clientY / window.innerHeight) * 2 + 1
+            );
+            this.raycaster.setFromCamera(this.mouseNDC, camera);
+
+            // true = recursive, so this still catches clicks on the little
+            // cosmetic sub-meshes spring-scale.js adds as children.
+            const hits = this.raycaster.intersectObject(this.el.object3D, true);
+            if (hits.length === 0) return; // this click didn't land on this entity
+
             console.log("[grabbable] mousedown on", this.el.id || this.el.tagName);
 
             this.isGrabbed = true;
             setDraggingObject(true); // tells adjustable-look to ignore this drag
             this.el.emit("grab-start", null, false);
 
-            const camera = this.el.sceneEl.camera;
             const camWorldDir = new THREE.Vector3();
             camera.getWorldDirection(camWorldDir);
 
@@ -47,21 +67,11 @@ if (!AFRAME.components["grabbable"]) {
             // should never move this on its own," which is what we want while
             // the mouse is directly controlling position. No-ops harmlessly if
             // this particular entity has no body at all.
-            //
-            // AFRAME.CANNON isn't exposed by this physics driver -- checked
-            // against its source, which keeps its cannon-es import
-            // module-local and never attaches it to the AFRAME namespace --
-            // so this reads KINEMATIC/DYNAMIC off the body's own constructor
-            // instead of a global that doesn't exist here.
             if (this.el.body) {
                 this.el.body.type = this.el.body.constructor.KINEMATIC;
                 // cannon-es still integrates position from velocity for
                 // KINEMATIC bodies (only gravity/damping skip them, not
-                // integration) -- checked directly in its integrate() source.
-                // Without this, whatever velocity the body had the instant
-                // it was grabbed keeps silently accumulating into its
-                // position every physics step, drifting it away from the
-                // cursor on its own. That's the stretch-then-vanish you saw.
+                // integration)
                 this.el.body.velocity.set(0, 0, 0);
                 this.el.body.angularVelocity.set(0, 0, 0);
             }
@@ -118,7 +128,9 @@ if (!AFRAME.components["grabbable"]) {
         },
 
         remove() {
-            this.el.removeEventListener("mousedown", this.onMouseDown);
+            if (this.canvas) {
+                this.canvas.removeEventListener("mousedown", this.onMouseDown);
+            }
             document.removeEventListener("mousemove", this.onMouseMove);
             document.removeEventListener("mouseup", this.onMouseUp);
         },
