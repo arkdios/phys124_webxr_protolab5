@@ -87,13 +87,12 @@ if (!AFRAME.components["mouse-grabbable"]) {
             setDraggingObject(true); // tells adjustable-look to ignore this drag
             this.el.emit("grab-start", null, false);
 
-            const camWorldDir = new THREE.Vector3();
-            camera.getWorldDirection(camWorldDir);
-
             const objWorldPos = new THREE.Vector3();
             this.el.object3D.getWorldPosition(objWorldPos);
 
-            this.dragPlane.setFromNormalAndCoplanarPoint(camWorldDir, objWorldPos);
+            // Horizontal plane at the object's current height, not a
+            // camera-facing plane.
+            this.dragPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 1, 0), objWorldPos);
 
             // Freeze physics while held: KINEMATIC means "the physics engine
             // should never move this on its own," which is what we want while

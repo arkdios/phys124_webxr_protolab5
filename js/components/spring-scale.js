@@ -20,6 +20,9 @@ const METERS_PER_NEWTON = 0.1;
 // being handed an unrealistic force to integrate.
 const MAX_SCALE_FORCE_N = 6;
 
+// The scale's string is a real (inextensible) string, not an elastic band
+const MAX_DRAG_RADIUS_M = MAX_SCALE_FORCE_N * METERS_PER_NEWTON;
+
 const LIVE_UPDATE_THROTTLE_MS = 150; // approx 7 Hz
 
 // Defensive guard against duplicate registration; see grabbable.js's
@@ -64,7 +67,8 @@ if (!AFRAME.components["spring-scale"]) {
         },
 
         tick() {
-        const reading = this.computeReading();
+            this.clampToMaxRadius();
+            const reading = this.computeReading();
 
         // Local UI update: free, happens every frame, no network involved.
         this.el.sceneEl.emit("reading-update", reading, false);
@@ -75,6 +79,37 @@ if (!AFRAME.components["spring-scale"]) {
             this.lastSentAt = now;
             sendRealtime({ type: "spring-scale-reading", ...reading });
         }
+        },
+
+        // Hard string-length limit: if dragged past MAX_DRAG_RADIUS_M from
+        // the platform centre, snap back to the boundary instead of
+        // letting the scale (and the visual string) stretch indefinitely.
+        clampToMaxRadius() {
+            const platformEl = this.data.platformSelector;
+            platformEl.object3D.getWorldPosition(this.platformPos);
+            this.el.object3D.getWorldPosition(this.myPos);
+    
+            const dx = this.myPos.x - this.platformPos.x;
+            const dz = this.myPos.z - this.platformPos.z;
+            const distance = Math.hypot(dx, dz);
+            if (distance <= MAX_DRAG_RADIUS_M) return;
+    
+            const scale = MAX_DRAG_RADIUS_M / distance;
+            const clampedWorld = new THREE.Vector3(
+                this.platformPos.x + dx * scale,
+                this.myPos.y,
+                this.platformPos.z + dz * scale
+            );
+    
+            const parent = this.el.object3D.parent;
+            this.el.object3D.position.copy(
+                parent ? parent.worldToLocal(clampedWorld) : clampedWorld
+            );
+    
+            // Keep the physics body in sync with the snap-back, same as
+            // grabbable.js does after any manual position write.
+            const dynamicBody = this.el.components["dynamic-body"];
+            if (dynamicBody) dynamicBody.syncToPhysics();
         },
 
         // The scale's offset from the platform centre, in the table's
