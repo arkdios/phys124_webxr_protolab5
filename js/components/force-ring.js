@@ -61,8 +61,22 @@ if (!AFRAME.components["force-ring"]) {
         },
 
         tick() {
-        const body = this.el.body;
-        if (!body) return; // physics body not ready yet (still loading)
+            const body = this.el.body;
+            if (!body) return; // physics body not ready yet (still loading)
+    
+            // Defensive recovery: this ring is very light (0.01kg) with a stiff
+            // (k=40) spring pulling it to centre.
+            const finite = Number.isFinite(body.position.x) && Number.isFinite(body.position.y) &&
+                Number.isFinite(body.position.z) && Number.isFinite(body.velocity.x) &&
+                Number.isFinite(body.velocity.y) && Number.isFinite(body.velocity.z);
+            if (!finite) {
+                console.warn("[force-ring] physics state went non-finite, resetting to spawn position");
+                body.position.set(0, 0.94, -0.6);
+                body.velocity.set(0, 0, 0);
+                body.angularVelocity.set(0, 0, 0);
+                body.force.set(0, 0, 0);
+                body.torque.set(0, 0, 0);
+            }
 
         // The spring component (index.html) already applies the
         // centre-seeking restoring force every tick on its own, in all 3
