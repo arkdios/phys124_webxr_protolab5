@@ -152,26 +152,26 @@
         <!-- Pulley 1 -->
         <a-cylinder id="pulley-1" radius="0.022" height="0.012"
                     color="#1a1a1a" position="0.2425 0.916 -0.74"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05"
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; linearDamping: 0.5; angularDamping: 0.5"
                     mouse-grabbable>
         </a-cylinder>
 
         <!-- Pulley 2 -->
         <a-cylinder id="pulley-2" radius="0.022" height="0.012"
                     color="#1a1a1a" position="-0.14 0.916 -0.8425"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05"
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.05; linearDamping: 0.5; angularDamping: 0.5"
                     mouse-grabbable>
         </a-cylinder>
 
         <!-- Hanging-mass props -->
         <a-cylinder id="mass-1" radius="0.022" height="0.03"
                     color="#8f8e89" position="0.2771 0.925 -0.76"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2"
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; linearDamping: 0.5; angularDamping: 0.5"
                     mouse-grabbable>
         </a-cylinder>
         <a-cylinder id="mass-2" radius="0.022" height="0.03"
                     color="#8f8e89" position="-0.16 0.925 -0.8771"
-                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2"
+                    dynamic-body="shape: cylinder; cylinderAxis: y; mass: 0.2; linearDamping: 0.5; angularDamping: 0.5"
                     mouse-grabbable>
         </a-cylinder>
 
@@ -179,7 +179,7 @@
         <a-box id="spring-scale" class="interactive"
             width="0.09" height="0.024" depth="0.016" color="#E5E4DF"
             position="-0.141 0.922 -0.549"
-            dynamic-body="shape: box; mass: 0.05"
+            dynamic-body="shape: box; mass: 0.05; linearDamping: 0.5; angularDamping: 0.5"
             mouse-grabbable
             spring-scale="platformSelector: #force-platform">
         </a-box>
