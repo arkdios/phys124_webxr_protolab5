@@ -32,6 +32,8 @@ if (!AFRAME.components["force-ring"]) {
         const anchorEl = document.querySelector("#platform-anchor");
         anchorEl.addEventListener("body-loaded", () => {
             anchorEl.body.collisionResponse = false;
+            // collisionResponse only disables the push-apart (normal) force.
+            anchorEl.body.material = new CANNON.Material({ friction: 0, restitution: 0 });
         });
 
         // The two known (fixed) hanging-mass forces for the active case,
@@ -54,6 +56,7 @@ if (!AFRAME.components["force-ring"]) {
             body.fixedRotation = true;
             body.updateMassProperties();
             body.collisionResponse = false;
+            body.material = new CANNON.Material({ friction: 0, restitution: 0 });
         });
         },
 
