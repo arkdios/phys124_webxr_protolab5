@@ -53,6 +53,7 @@ if (!AFRAME.components["force-ring"]) {
             const body = this.el.body;
             body.fixedRotation = true;
             body.updateMassProperties();
+            body.collisionResponse = false;
         });
         },
 
