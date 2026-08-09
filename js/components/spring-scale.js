@@ -90,14 +90,15 @@ if (!AFRAME.components["spring-scale"]) {
             this.el.object3D.getWorldPosition(this.myPos);
     
             const dx = this.myPos.x - this.platformPos.x;
+            const dy = this.myPos.y - this.platformPos.y;
             const dz = this.myPos.z - this.platformPos.z;
-            const distance = Math.hypot(dx, dz);
+            const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
             if (distance <= MAX_DRAG_RADIUS_M) return;
     
             const scale = MAX_DRAG_RADIUS_M / distance;
             const clampedWorld = new THREE.Vector3(
                 this.platformPos.x + dx * scale,
-                this.myPos.y,
+                this.platformPos.y + dy * scale,
                 this.platformPos.z + dz * scale
             );
     

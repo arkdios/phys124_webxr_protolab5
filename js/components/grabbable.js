@@ -10,6 +10,10 @@
 
 import { setDraggingObject } from "../interaction-state.js";
 
+// Desk top surface is at y=0.89 (position 0.86 + half-height 0.03). No
+// dragged object should ever go below this
+const DRAG_FLOOR_Y = 0.89;
+
 if (!AFRAME.components["mouse-grabbable"]) {
     AFRAME.registerComponent("mouse-grabbable", {
         init() {
@@ -87,12 +91,15 @@ if (!AFRAME.components["mouse-grabbable"]) {
             setDraggingObject(true); // tells adjustable-look to ignore this drag
             this.el.emit("grab-start", null, false);
 
+            const camWorldDir = new THREE.Vector3();
+            camera.getWorldDirection(camWorldDir);
+
             const objWorldPos = new THREE.Vector3();
             this.el.object3D.getWorldPosition(objWorldPos);
 
-            // Horizontal plane at the object's current height, not a
-            // camera-facing plane.
-            this.dragPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 1, 0), objWorldPos);
+            // Camera-facing plane, so dragging follows the mouse freely in
+            // 3D (up/down/sideways), not locked to a flat height.
+            this.dragPlane.setFromNormalAndCoplanarPoint(camWorldDir, objWorldPos);
 
             // Freeze physics while held: KINEMATIC means "the physics engine
             // should never move this on its own," which is what we want while
@@ -124,6 +131,11 @@ if (!AFRAME.components["mouse-grabbable"]) {
             const hit = this.raycaster.ray.intersectPlane(this.dragPlane, this.intersectionPoint);
 
             if (hit) {
+                // Never let a drag pull the object below the desk surface.
+                if (this.intersectionPoint.y < DRAG_FLOOR_Y) {
+                    this.intersectionPoint.y = DRAG_FLOOR_Y;
+                }
+
                 this.el.object3D.position.copy(this.el.object3D.parent.worldToLocal(this.intersectionPoint.clone()));
 
                 // Push the new position into the physics body ourselves. Without
